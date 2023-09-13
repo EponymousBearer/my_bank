@@ -1,11 +1,11 @@
 {
-  "name": "countdown_timer_adnan",
+  "name": "oop_adnan",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
   "type": "module",
   "bin": {
-    "countdown_timer_adnan": "./index.js"
+    "oop_adnan": "./index.js"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"

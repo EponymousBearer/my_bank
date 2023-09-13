@@ -6,60 +6,41 @@ const rl = readline.createInterface({
   output: process.stdout,
 });
 
-function waitForPlayerInput(prompt: string): Promise<string> {
-  return new Promise<string>((resolve) => {
-    rl.question(prompt, (answer) => {
-      resolve(answer);
-    });
-  });
-}
+class Person {
+  private name: string;
+  private personality: string;
 
-class CountdownTimer {
-  private timer: NodeJS.Timeout | null = null;
-
-  start(duration: number) {
-    let remainingSeconds = duration;
-
-    this.timer = setInterval(() => {
-      this.displayTime(remainingSeconds);
-
-      if (remainingSeconds === 0) {
-        this.stop();
-      } else {
-        remainingSeconds--;
-      }
-    }, 1000);
+  constructor(name: string, personality: string) {
+    this.name = name;
+    this.personality = personality;
   }
 
-  stop() {
-    if (this.timer) {
-      clearInterval(this.timer);
-      this.timer = null;
-      console.log(chalk.red.bold('\nTime\'s up!'));
-      rl.close();
+  getType(): string {
+    return this.personality;
+  }
+}
+
+console.log(chalk.yellow('Welcome! Let\'s learn about your personality and name.\n'));
+
+rl.question(chalk.cyan('What is your personality like? '), (personality) => {
+  rl.question(chalk.cyan('What is your name? '), (name) => {
+    const person = new Person(name, personality);
+
+    switch (person.getType().toLowerCase()) {
+      case 'mystery':
+        console.log(chalk.magenta(`Hello, ${person.getType()}! You are an enigmatic individual.`));
+        break;
+      case 'friendly':
+        console.log(chalk.green(`Hello, ${person.getType()}! You are a friendly person.`));
+        break;
+      case 'optimistic':
+        console.log(chalk.blue(`Hello, ${person.getType()}! You have an optimistic personality.`));
+        break;
+      default:
+        console.log(chalk.cyan(`Hello, ${person.getType()}! Nice to meet you.`));
+        break;
     }
-  }
 
-  displayTime(seconds: number) {
-    process.stdout.clearLine(0);
-    process.stdout.cursorTo(0);
-    process.stdout.write(chalk.green.bold(`Time Left: ${seconds} seconds`));
-  }
-}
-
-console.log(chalk.yellow.bold('Welcome to the Countdown Timer CLI\n'));
-
-(async () => {
-  const durationInput = await waitForPlayerInput('Enter the countdown duration (seconds): ');
-
-  const duration = parseInt(durationInput, 10);
-
-  if (isNaN(duration) || duration <= 0) {
-    console.log(chalk.red('Invalid input. Please enter a positive number.'));
     rl.close();
-    return;
-  }
-
-  const timer = new CountdownTimer();
-  timer.start(duration);
-})();
+  });
+});
