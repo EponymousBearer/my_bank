@@ -1,12 +1,12 @@
-import chalk from 'chalk';
 import readline from 'readline';
+import chalk from 'chalk';
 
 const rl = readline.createInterface({
   input: process.stdin,
   output: process.stdout,
 });
 
-async function waitForPlayerInput(prompt: string): Promise<string> {
+function waitForPlayerInput(prompt: string): Promise<string> {
   return new Promise<string>((resolve) => {
     rl.question(prompt, (answer) => {
       resolve(answer);
@@ -14,64 +14,52 @@ async function waitForPlayerInput(prompt: string): Promise<string> {
   });
 }
 
-class AdventureGame {
-  private riddles: { question: string; options: string[]; correctAnswer: string }[] = [
-    {
-      question: "I'm tall when I'm young, and short when I'm old. What am I?",
-      options: ["Candle", "Tree", "Person"],
-      correctAnswer: "Candle",
-    },
-    {
-      question: "I'm always hungry, I must always be fed. The finger I touch will soon turn red. What am I?",
-      options: ["Fire", "Vampire", "Dragon"],
-      correctAnswer: "Fire",
-    },
-    {
-      question: "What has keys but can't open locks?",
-      options: ["Keyboard", "Treasure Chest", "Map"],
-      correctAnswer: "Keyboard",
-    },
-  ];
+class CountdownTimer {
+  private timer: NodeJS.Timeout | null = null;
 
-  private currentRiddleIndex: number = 0;
-  private correctAnswers: number = 0;
+  start(duration: number) {
+    let remainingSeconds = duration;
 
-  constructor() {}
+    this.timer = setInterval(() => {
+      this.displayTime(remainingSeconds);
 
-  async play() {
-    console.log(chalk.bold("\nWelcome to the Riddle Adventure Game!"));
-
-    while (this.currentRiddleIndex < this.riddles.length) {
-      this.displayRiddle();
-
-      const playerAnswer = await waitForPlayerInput("Your answer: ");
-      if (this.checkAnswer(playerAnswer)) {
-        console.log(chalk.green("Correct! Proceed to the next riddle."));
-        this.currentRiddleIndex++;
-        this.correctAnswers++;
+      if (remainingSeconds === 0) {
+        this.stop();
       } else {
-        console.log(chalk.red("Incorrect. Better luck next time!"));
-        rl.close();
-        return;
+        remainingSeconds--;
       }
+    }, 1000);
+  }
+
+  stop() {
+    if (this.timer) {
+      clearInterval(this.timer);
+      this.timer = null;
+      console.log(chalk.red.bold('\nTime\'s up!'));
+      rl.close();
     }
-
-    console.log(chalk.bgMagenta("\nCongratulations! You found the treasure."));
-    rl.close();
   }
 
-  displayRiddle() {
-    const riddle = this.riddles[this.currentRiddleIndex];
-    console.log(`\nRiddle ${this.currentRiddleIndex + 1}:`);
-    console.log(riddle.question);
-    console.log("Options: " + riddle.options.join(', '));
-  }
-
-  checkAnswer(playerAnswer: string): boolean {
-    const riddle = this.riddles[this.currentRiddleIndex];
-    return playerAnswer.toLowerCase() === riddle.correctAnswer.toLowerCase();
+  displayTime(seconds: number) {
+    process.stdout.clearLine(0);
+    process.stdout.cursorTo(0);
+    process.stdout.write(chalk.green.bold(`Time Left: ${seconds} seconds`));
   }
 }
 
-const game = new AdventureGame();
-game.play();
+console.log(chalk.yellow.bold('Welcome to the Countdown Timer CLI\n'));
+
+(async () => {
+  const durationInput = await waitForPlayerInput('Enter the countdown duration (seconds): ');
+
+  const duration = parseInt(durationInput, 10);
+
+  if (isNaN(duration) || duration <= 0) {
+    console.log(chalk.red('Invalid input. Please enter a positive number.'));
+    rl.close();
+    return;
+  }
+
+  const timer = new CountdownTimer();
+  timer.start(duration);
+})();
