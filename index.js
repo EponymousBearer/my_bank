@@ -5,35 +5,31 @@ const rl = readline.createInterface({
     input: process.stdin,
     output: process.stdout,
 });
-class Person {
-    name;
-    personality;
-    constructor(name, personality) {
-        this.name = name;
-        this.personality = personality;
+console.log(chalk.bold("Welcome! Let's learn about your personality and name.\n"));
+rl.question("Type 1 if you are a bit mysterious to others\nType 2 if you like to talk with anyone around you\nType 3 if you are the one who is hopeful and confident about the future!\nEnter your answer: ", (personalityChoice) => {
+    if (personalityChoice === '1' || personalityChoice === '2' || personalityChoice === '3') {
+        rl.question(chalk.yellow("What is your name? "), (name) => {
+            let personality;
+            switch (personalityChoice) {
+                case "1":
+                    personality = "enigmatic";
+                    break;
+                case "2":
+                    personality = "friendly";
+                    break;
+                case "3":
+                    personality = "optimistic";
+                    break;
+                default:
+                    personality = "unknown";
+                    break;
+            }
+            console.log(chalk.cyan(`\nHello, ${name}! You are ${personality}.`));
+            rl.close();
+        });
     }
-    getType() {
-        return this.personality;
-    }
-}
-console.log(chalk.yellow('Welcome! Let\'s learn about your personality and name.\n'));
-rl.question(chalk.cyan('What is your personality like? '), (personality) => {
-    rl.question(chalk.cyan('What is your name? '), (name) => {
-        const person = new Person(name, personality);
-        switch (person.getType().toLowerCase()) {
-            case 'mystery':
-                console.log(chalk.magenta(`Hello, ${person.getType()}! You are an enigmatic individual.`));
-                break;
-            case 'friendly':
-                console.log(chalk.green(`Hello, ${person.getType()}! You are a friendly person.`));
-                break;
-            case 'optimistic':
-                console.log(chalk.blue(`Hello, ${person.getType()}! You have an optimistic personality.`));
-                break;
-            default:
-                console.log(chalk.cyan(`Hello, ${person.getType()}! Nice to meet you.`));
-                break;
-        }
+    else {
+        console.log(chalk.red("Invalid choice. Please enter 1, 2, or 3."));
         rl.close();
-    });
+    }
 });
