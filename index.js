@@ -1,35 +1,123 @@
-#!/usr/bin/env node
 import readline from 'readline';
 import chalk from 'chalk';
 const rl = readline.createInterface({
     input: process.stdin,
     output: process.stdout,
 });
-console.log(chalk.bold("Welcome! Let's learn about your personality and name.\n"));
-rl.question("Type 1 if you are a bit mysterious to others\nType 2 if you like to talk with anyone around you\nType 3 if you are the one who is hopeful and confident about the future!\nEnter your answer: ", (personalityChoice) => {
-    if (personalityChoice === '1' || personalityChoice === '2' || personalityChoice === '3') {
-        rl.question(chalk.yellow("What is your name? "), (name) => {
-            let personality;
-            switch (personalityChoice) {
-                case "1":
-                    personality = "enigmatic";
-                    break;
-                case "2":
-                    personality = "friendly";
-                    break;
-                case "3":
-                    personality = "optimistic";
-                    break;
-                default:
-                    personality = "unknown";
-                    break;
-            }
-            console.log(chalk.cyan(`\nHello, ${name}! You are ${personality}.`));
-            rl.close();
+class Customer {
+    firstName;
+    lastName;
+    age;
+    gender;
+    mobileNumber;
+    bankAccount;
+    constructor(firstName, lastName, age, gender, mobileNumber, initialBalance) {
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.age = age;
+        this.gender = gender;
+        this.mobileNumber = mobileNumber;
+        this.bankAccount = new BankAccount(initialBalance);
+    }
+    getFullName() {
+        return `${this.firstName} ${this.lastName}`;
+    }
+    deposit(amount) {
+        if (amount <= 0) {
+            console.log(chalk.red('Invalid deposit amount. Please enter a positive amount.'));
+            return;
+        }
+        if (amount >= 100) {
+            console.log(chalk.yellow('A $1 fee will be deducted from your deposit.'));
+            amount -= 1;
+        }
+        this.bankAccount.credit(amount);
+        console.log(chalk.green(`$${amount} deposited successfully. New balance: $${this.bankAccount.getBalance()}`));
+    }
+    withdraw(amount) {
+        if (amount <= 0) {
+            console.log(chalk.red('Invalid withdrawal amount. Please enter a positive amount.'));
+            return;
+        }
+        if (amount > this.bankAccount.getBalance()) {
+            console.log(chalk.red('Insufficient balance. Withdrawal canceled.'));
+            return;
+        }
+        this.bankAccount.debit(amount);
+        console.log(chalk.green(`$${amount} withdrawn successfully. New balance: $${this.bankAccount.getBalance()}`));
+    }
+    checkBalance() {
+        console.log(chalk.italic(`Account balance for ${this.getFullName()}: $${this.bankAccount.getBalance()}`));
+    }
+}
+class BankAccount {
+    balance;
+    constructor(initialBalance) {
+        this.balance = initialBalance;
+    }
+    getBalance() {
+        return this.balance;
+    }
+    credit(amount) {
+        this.balance += amount;
+    }
+    debit(amount) {
+        this.balance -= amount;
+    }
+}
+console.log(chalk.bold('Welcome to MyBank CLI'));
+console.log(chalk.bold('Enter customer details:'));
+rl.question(chalk.cyan('First Name: '), (firstName) => {
+    rl.question(chalk.cyan('Last Name: '), (lastName) => {
+        rl.question(chalk.cyan('Age: '), (ageStr) => {
+            const age = parseInt(ageStr);
+            rl.question(chalk.cyan('Gender: '), (gender) => {
+                rl.question(chalk.cyan('Mobile Number: '), (mobileNumber) => {
+                    rl.question(chalk.cyan('Initial Account Balance: $'), (initialBalanceStr) => {
+                        const initialBalance = parseFloat(initialBalanceStr);
+                        const customer = new Customer(firstName, lastName, age, gender, mobileNumber, initialBalance);
+                        console.log(chalk.green(`\nWelcome, ${customer.getFullName()}! Your account has been created.`));
+                        showMenu(customer);
+                    });
+                });
+            });
         });
-    }
-    else {
-        console.log(chalk.red("Invalid choice. Please enter 1, 2, or 3."));
-        rl.close();
-    }
+    });
 });
+function showMenu(customer) {
+    console.log(chalk.yellowBright('\nMain Menu:'));
+    console.log(chalk.yellow('1. Deposit'));
+    console.log(chalk.yellow('2. Withdraw'));
+    console.log(chalk.yellow('3. Check Balance'));
+    console.log(chalk.yellow('4. Exit'));
+    rl.question(chalk.cyan('Enter your choice: '), (choice) => {
+        switch (choice) {
+            case '1':
+                rl.question(chalk.italic('Enter deposit amount: $'), (amountStr) => {
+                    const amount = parseFloat(amountStr);
+                    customer.deposit(amount);
+                    showMenu(customer);
+                });
+                break;
+            case '2':
+                rl.question(chalk.italic('Enter withdrawal amount: $'), (amountStr) => {
+                    const amount = parseFloat(amountStr);
+                    customer.withdraw(amount);
+                    showMenu(customer);
+                });
+                break;
+            case '3':
+                customer.checkBalance();
+                showMenu(customer);
+                break;
+            case '4':
+                console.log(chalk.yellow('Thank you for using MyBank CLI. Goodbye!'));
+                rl.close();
+                break;
+            default:
+                console.log(chalk.red('Invalid choice. Please enter a valid option.'));
+                showMenu(customer);
+                break;
+        }
+    });
+}

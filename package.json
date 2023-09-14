@@ -1,11 +1,11 @@
 {
-  "name": "oop_adnan",
+  "name": "my_bank_adnan",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
   "type": "module",
   "bin": {
-    "oop_adnan": "./index.js"
+    "my_bank_adnan": "./index.js"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
